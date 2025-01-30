@@ -40,7 +40,7 @@ class FailureCounter:
             if is_raise:
                 raise_error(FailureLimitReachedException(self.fail_count))
             else:
-                sleep_time = random.randint(2, 5) * 60
+                sleep_time = random.randint(10, 30) * 60
                 msg = f"{self.id} | Sleeping for {int(sleep_time)} seconds... Too many errors. Retrying..."
                 await self.reset_with_delay(msg, sleep_time)
         else:
@@ -67,12 +67,12 @@ class FailureCounter:
         FailureCounter.global_fail_counter = {x: 1 for x in FailureCounter.global_fail_counter}
 
     @staticmethod
-    def is_global_error(min_limit: int = 10):
+    def is_global_error(min_limit: int = 5):
         amount = len(FailureCounter.global_fail_counter)
         work_count = sum(FailureCounter.global_fail_counter.values())
         fail_count = amount - work_count
 
-        limit_fail_amount = amount * 0.30
+        limit_fail_amount = amount * 0.50
 
         if limit_fail_amount < min_limit:
             limit_fail_amount = min(amount, min_limit)
