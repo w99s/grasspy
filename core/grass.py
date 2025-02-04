@@ -181,10 +181,10 @@ class Grass(GrassWs, GrassRest, FailureCounter):
 
         logger.info(f"{self.id} | Proxy score not found for {self.proxy}. Waiting for score...")
 
-
+    # ฟังชั่นเปลี่ยน proxy อัตโนมัติตามเงื่อนไข
     async def change_proxy(self):
         self.proxy = await self.get_new_proxy()
-
+    # ดึง Proxy จากรายการ ProxyList ใน Database / มองข้ามอันที่มีเจ้าของ,มีการใช้งาน, หากเจ้าของเดิมให้เข้าเงื่อนไข
     async def get_new_proxy(self):
         while self.is_extra_proxies_left:
             if (proxy := await self.db.get_new_from_extra_proxies("ProxyList")) is not None:
@@ -201,18 +201,18 @@ class Grass(GrassWs, GrassRest, FailureCounter):
                 self.is_extra_proxies_left = False
 
         return await self.next_proxy()
-
+    # ถ้า proxy หมด ให้พัก 60 นาที และลองเรียก proxy เดิมอีกครั้ง 
     async def next_proxy(self):
         if not self.proxies:
-            await self.reset_with_delay(f"{self.id} | No proxies left. Use same proxy...", 30 * 60)
+            await self.reset_with_delay(f"{self.id} | No proxies left. Use same proxy...", 60 * 60)
             return self.proxy
-            # raise NoProxiesException(f"{self.id} | No proxies left. Exiting...")
-
+        
         proxy = self.proxies.pop(0)
         self.proxies.append(proxy)
 
         return proxy
-
+        # Proxy Rotate กรณีที่ยังมีproxyให้ใช้งาน
+    
     @staticmethod
     def is_site_down():
         if STOP_ACCOUNTS_WHEN_SITE_IS_DOWN and Grass.is_global_error():
